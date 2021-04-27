@@ -1,0 +1,28 @@
+{
+  "name": "png-crop",
+  "version": "1.0.0",
+  "description": "a small helper that crops a given image and returns the cropped image as new url",
+  "main": "index.js",
+  "scripts": {
+    "build": "echo 'not impl yet'"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mace-w/png-crop.git"
+  },
+  "keywords": [
+    "png",
+    "crop"
+  ],
+  "author": "matthias 'mace' wieland",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/mace-w/png-crop/issues"
+  },
+  "homepage": "https://github.com/mace-w/png-crop#readme",
+  "dependencies": {},
+  "devDependencies": {
+    "@babel/preset-typescript": "^7.13.0",
+    "typescript": "^4.2.4"
+  }
+}
