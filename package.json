@@ -1,12 +1,17 @@
 {
   "name": "@mace-w/auto-crop",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "a small helper that crops a given image and returns the cropped image as new url",
   "source": "src/auto-crop.ts",          
   "main": "dist/auto-crop.js",           
   "exports": "./dist/auto-crop.modern.js",
   "module": "dist/auto-crop.module.js",  
   "unpkg": "dist/auto-crop.umd.js",      
+  "files": [
+    "dist/",
+    "LICENSE",
+    "README.md"
+  ],
   "scripts": {
     "build": "microbundle",        
     "dev": "microbundle watch"     
