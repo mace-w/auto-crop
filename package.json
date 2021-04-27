@@ -1,5 +1,5 @@
 {
-  "name": "auto-crop",
+  "name": "@mace-w/auto-crop",
   "version": "1.0.0",
   "description": "a small helper that crops a given image and returns the cropped image as new url",
   "main": "index.js",
@@ -8,7 +8,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/mace-w/png-crop.git"
+    "url": "git+https://github.com/mace-w/auto-crop.git"
   },
   "keywords": [
     "png",
@@ -17,9 +17,9 @@
   "author": "matthias 'mace' wieland",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/mace-w/png-crop/issues"
+    "url": "https://github.com/mace-w/auto-crop/issues"
   },
-  "homepage": "https://github.com/mace-w/png-crop#readme",
+  "homepage": "https://github.com/mace-w/auto-crop#readme",
   "dependencies": {},
   "devDependencies": {
     "@babel/preset-typescript": "^7.13.0",
