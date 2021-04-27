@@ -1,5 +1,5 @@
 {
-  "name": "png-crop",
+  "name": "auto-crop",
   "version": "1.0.0",
   "description": "a small helper that crops a given image and returns the cropped image as new url",
   "main": "index.js",
