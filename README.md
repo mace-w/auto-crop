@@ -5,6 +5,10 @@ visible content. Especially useful for transparent PNGs --- for example
 renderings, icons, or images with large safe zones. The service inspects
 pixel alpha values to remove empty transparent borders.
 
+## Demo
+
+https://codepen.io/Mace-Wieland/pen/myPMgaB
+
 ## ✨ Features
 
 -   Automatically crops an image down to its meaningful content
@@ -12,6 +16,7 @@ pixel alpha values to remove empty transparent borders.
 -   Adjustable "inaccuracy" value to trade accuracy for performance
 -   Returns Base64 URLs that can be directly used as an image source
 -   Zero dependencies
+
 
 ## 📦 Installation
 
