@@ -103,7 +103,7 @@ export class ImageCropService {
 
     // to increase performance, only check every SKIP_PIXEL pixel;
     // Math.max because someone could try to mess with it.
-    const SKIP_PIXEL = Math.max(0, inaccuracy);
+    const SKIP_PIXEL = Math.max(inaccuracy);
 
     // before going through every pixel, check if edges are transparent at all.
     // if top-left && bottom-right pixel are not transparent, nothing to crop
@@ -115,7 +115,7 @@ export class ImageCropService {
     // 1 Pixel equals four values: red, green, blue, alpha
     // there for += 4, to get the next pixel, not the next channel-value
     // this times SKIL_PIXEL skip the given amount of pixels
-    for (let pixel = 0; pixel < imgData.length; pixel += AMOUT_OF_CHANNELS * SKIP_PIXEL) {
+    for (let pixel = 0; pixel < imgData.length; pixel += AMOUT_OF_CHANNELS * (SKIP_PIXEL + 1)) {
       const alpha = imgData[pixel + (AMOUT_OF_CHANNELS - 1)];
 
       if (alpha !== 0) {
