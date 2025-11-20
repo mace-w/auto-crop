@@ -1,6 +1,6 @@
 {
   "name": "@mace-w/auto-crop",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "a small helper that crops a given image and returns the cropped image as new url",
   "source": "src/auto-crop.ts",
   "main": "dist/auto-crop.js",
