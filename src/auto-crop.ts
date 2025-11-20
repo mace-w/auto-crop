@@ -1,43 +1,46 @@
 
 
-// Default amount of skipped pixel while scanning the image
+// Default amount of skipped pixels while scanning the image
 const DEFAULT_INACCURACY_PX = 5;
 
 // Default amount of channels of each pixel: Red, Green, Blue, Alpha
-const AMOUT_OF_CHANNELS = 4;
+const AMOUNT_OF_CHANNELS = 4;
 
 /**
- * @name ImageCropService
+ * Service for cropping images to their base content by removing transparent borders.
+ * 
+ * Especially useful for transparent images where you want to remove the safe zone
+ * and get only the actual content area.
  *
- * @description provide methods to crop an image to its base content. Especially when it comes to transparent BBD Images, this service can be used to get the actual car without safezone
- * if image was already preloaded, use new ImageCropService().crop(image), which will return the url
  * @example
- * import { ImageCropService } from 'workbench-core';
+ * // Promise-based approach (recommended)
+ * new ImageCropService().getCroppedImageUrl(imageUrl)
+ *   .then(croppedUrl => { myImage.src = croppedUrl.toString(); });
  *
- *  // safe promise approach
- *  new ImageCropService().getCroppedImageUrl(url).then(url => {myImage.src = url});
- *
- *  // or (use with caution!) if image data already exists (preloaded etc.)
- *  myImage = new ImageCropService().cropImage(myImage);
+ * // Direct approach (use only if image is already loaded)
+ * const croppedImage = new ImageCropService().cropImage(myImage);
  */
 export class ImageCropService {
   /**
-   * will return a Promise which will return a cropped url or the input url if it cannot be cropped.
-   * @param url of the image you want to crop
-   * @param inaccuracy defines how many pixels should be skipped while scanning. Improves performance, reduces accuracy.
-   *
-   * @returns Promis<URL> with the url of the cropped image
-   *
-   * @throws error if image cannot be loaded;
+   * Returns a Promise that resolves to a URL of the cropped image.
+   * 
+   * @param url - The URL of the image to crop
+   * @param inaccuracy - Number of pixels to skip while scanning (default: 5).
+   *                     Higher values improve performance but reduce accuracy.
+   * @returns Promise that resolves to the URL of the cropped image as a data URL
+   * @throws Error if the URL is invalid or the image cannot be loaded
    */
   public getCroppedImageUrl(url: string, inaccuracy = DEFAULT_INACCURACY_PX): Promise<URL> {
-    return new Promise((resolve) => {
+    if (typeof url !== 'string' || url.trim() === '') {
+      throw new Error('[ImageCropService] invalid url provided');
+    }
+    return new Promise((resolve, reject) => {
       const image = new Image();
       image.onload = () => {
         resolve(this.cropImageElement(image, inaccuracy));
       };
       image.onerror = () => {
-        console.error('could not load given image', ImageCropService.name);
+        reject(new Error('[ImageCropService] could not load given image'));
       };
       image.crossOrigin = 'anonymous';
       image.src = url;
@@ -45,12 +48,12 @@ export class ImageCropService {
   }
 
   /**
-   * will change the src of the given image with the base64 url of the cropped image, and return it
-   *
-   * @param image your native HTMLImageElement
-   * @param inaccuracy defines how many pixels should be skipped while scanning. Improves performance, reduces accuracy.
-   *
-   * @returns cropped HTMLImageElement of input
+   * Modifies the provided image element's src to the cropped version and returns it.
+   * 
+   * @param image - The HTMLImageElement to crop (must be already loaded)
+   * @param inaccuracy - Number of pixels to skip while scanning (default: 5).
+   *                     Higher values improve performance but reduce accuracy.
+   * @returns The same HTMLImageElement with its src updated to the cropped data URL
    */
   public cropImage(image: HTMLImageElement, inaccuracy = DEFAULT_INACCURACY_PX): HTMLImageElement {
     image.src = this.cropImageElement(image, inaccuracy).toString();
@@ -58,26 +61,40 @@ export class ImageCropService {
   }
 
   /**
-   * creates a new canas
-   * @param width defines how wide the canvas is
-   * @param height defines how tall the canvas is
+   * Creates a new canvas element with the specified dimensions.
+   * 
+   * @param width - Width of the canvas in pixels (must be positive and finite)
+   * @param height - Height of the canvas in pixels (must be positive and finite)
+   * @returns A new HTMLCanvasElement with the specified dimensions
+   * @throws Error if width or height are invalid (non-positive or non-finite)
    */
   private createCanvas(width: number, height: number): HTMLCanvasElement {
-    const canvas = document.createElement('canvas') as HTMLCanvasElement;
+    if (width <= 0 || height <= 0 || !Number.isFinite(width) || !Number.isFinite(height)) {
+      throw new Error('[ImageCropService] invalid image dimensions for canvas creation');
+    }
+    const canvas = document.createElement('canvas');
     canvas.width = width;
     canvas.height = height;
     return canvas;
   }
 
   /**
-   * will return base64 url of cropped Image (this is where the actual magic happens)
-   * @param image is already preloaded/available HTMLImageElement
-   * @param inaccuracy defines how many pixels should be skipped. Improves performance, reduces accuracy.
-   * @throws error if no image given
+   * Crops the image to its content boundaries and returns a data URL.
+   * 
+   * This is the core cropping algorithm that:
+   * 1. Scans the image to find non-transparent pixels
+   * 2. Calculates the bounding box of actual content
+   * 3. Creates a new canvas with only the content area
+   * 
+   * @param image - The preloaded HTMLImageElement to crop
+   * @param inaccuracy - Number of pixels to skip while scanning (default: 5).
+   *                     Higher values improve performance but reduce accuracy.
+   * @returns Data URL of the cropped image
+   * @throws Error if the image is invalid or has no dimensions
    */
   private cropImageElement(image: HTMLImageElement, inaccuracy = DEFAULT_INACCURACY_PX): URL {
-    if (!image || !image.width || !image.height) {
-      throw '[ImageCropService] no valid image given';
+    if (!image?.width || !image?.height) {
+      throw new Error('[ImageCropService] no valid image given');
     }
 
     const imgWidth = image.width;
@@ -86,13 +103,16 @@ export class ImageCropService {
     // create image-sized canvas and place image at origin
     let canvas = this.createCanvas(imgWidth, imgHeight);
     let ctx = canvas.getContext('2d');
+    if (!ctx) {
+      throw new Error('[ImageCropService] could not get canvas context');
+    }
     ctx.drawImage(image, 0, 0);
 
     // get rawdata, format: each pixel = 4 channels (red, green, blue, alpha)
     // [px0r, px0g, px0b, px0a,  px1r, px1g, px1b, px1a,  …]
     const imgData = ctx.getImageData(0, 0, imgWidth, imgHeight).data;
 
-    // assume that there could be completly transparent pngs
+    // assume that there could be completely transparent pngs
     let hasContent = false;
 
     // set extreme values
@@ -107,21 +127,22 @@ export class ImageCropService {
 
     // before going through every pixel, check if edges are transparent at all.
     // if top-left && bottom-right pixel are not transparent, nothing to crop
-    // inspecting first pixels alpha (based on r,g,b,a) and last pixels alpha
-    if (imgData[3] != 0 && imgData[imgData.length - 1] != 0) {
+    // inspecting first pixel's alpha (based on r,g,b,a) and last pixel's alpha
+    if (imgData[3] !== 0 && imgData.at(-1) !== 0) {
       return new URL(canvas.toDataURL());
     }
 
     // 1 Pixel equals four values: red, green, blue, alpha
-    // there for += 4, to get the next pixel, not the next channel-value
-    // this times SKIP_PIXEL skip the given amount of pixels
-    for (let pixel = 0; pixel < imgData.length; pixel += AMOUT_OF_CHANNELS * (SKIP_PIXEL + 1)) {
-      const alpha = imgData[pixel + (AMOUT_OF_CHANNELS - 1)];
+    // therefore += 4, to get the next pixel, not the next channel-value
+    // this times SKIP_PIXEL skips the given amount of pixels
+    for (let pixel = 0; pixel < imgData.length; pixel += AMOUNT_OF_CHANNELS * Math.max(SKIP_PIXEL, 1)) {
+      const alpha = imgData[pixel + (AMOUNT_OF_CHANNELS - 1)];
 
       if (alpha !== 0) {
         hasContent = true;
-        const x = (pixel / AMOUT_OF_CHANNELS) % imgWidth;
-        const y = Math.floor(pixel / AMOUT_OF_CHANNELS / imgWidth);
+        const pixelIndex = pixel / AMOUNT_OF_CHANNELS;
+        const x = pixelIndex % imgWidth;
+        const y = Math.floor(pixelIndex / imgWidth);
 
         firstMeaningfulX = Math.min(firstMeaningfulX, x);
         firstMeaningfulY = Math.min(firstMeaningfulY, y);
@@ -140,6 +161,9 @@ export class ImageCropService {
       canvas = this.createCanvas(width, height);
 
       ctx = canvas.getContext('2d');
+      if (!ctx) {
+        throw new Error('[ImageCropService] could not get canvas context');
+      }
 
       // translate image to have first meaningful pixel at edge, place image
       ctx.drawImage(image, -firstMeaningfulX, -firstMeaningfulY, imgWidth, imgHeight);
