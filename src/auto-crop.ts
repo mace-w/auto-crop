@@ -103,7 +103,7 @@ export class ImageCropService {
 
     // to increase performance, only check every SKIP_PIXEL pixel;
     // Math.max because someone could try to mess with it.
-    const SKIP_PIXEL = Math.max(inaccuracy);
+    const SKIP_PIXEL = Math.max(0, inaccuracy);
 
     // before going through every pixel, check if edges are transparent at all.
     // if top-left && bottom-right pixel are not transparent, nothing to crop
