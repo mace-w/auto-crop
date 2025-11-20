@@ -114,7 +114,7 @@ export class ImageCropService {
 
     // 1 Pixel equals four values: red, green, blue, alpha
     // there for += 4, to get the next pixel, not the next channel-value
-    // this times SKIL_PIXEL skip the given amount of pixels
+    // this times SKIP_PIXEL skip the given amount of pixels
     for (let pixel = 0; pixel < imgData.length; pixel += AMOUT_OF_CHANNELS * (SKIP_PIXEL + 1)) {
       const alpha = imgData[pixel + (AMOUT_OF_CHANNELS - 1)];
 
